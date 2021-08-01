@@ -103,8 +103,7 @@ class AmiNemController(udi_interface.Node):
                 #nodes[node].query()
                 nodes[node].reportDrivers()
                 self.discover()
-            pass
-                #time.sleep('{}'.format(timeout)/1000)
+                time.sleep(.5)
 
     def query(self,command=None):
         self.discover()
