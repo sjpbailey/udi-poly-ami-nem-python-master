@@ -40,6 +40,7 @@ class AmiNemNode(udi_interface.Node):
     
     def start(self):
         if self.isy_ip is not None:
+            self.setDriver('GPV', 1)
             amiem_url = "http://" + self.isy_ip + "/rest/emeter"
             
             amiem_count = 0
@@ -91,10 +92,6 @@ class AmiNemNode(udi_interface.Node):
         self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
         self.setDriver('GV2', prevs_count/float(self.nem_oncor))
         self.setDriver('GV3', sumss_count/float(self.nem_oncor))
-        
-        if amiem_count is not None:
-            self.setDriver('GPV', 1)
-        pass
 
     def poll(self, polltype):
         self.query()
