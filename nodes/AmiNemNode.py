@@ -97,12 +97,13 @@ class AmiNemNode(udi_interface.Node):
         pass
 
     def poll(self, polltype):
+        self.query()
         self.reportDrivers()
         LOGGER.debug('shortPoll (node)')
 
     def query(self,command=None):
         self.reportDrivers()
-        self.start()
+        self.poll()
 
     
     drivers = [

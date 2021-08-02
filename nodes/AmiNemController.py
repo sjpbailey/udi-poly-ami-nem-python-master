@@ -100,10 +100,10 @@ class AmiNemController(udi_interface.Node):
         nodes = self.poly.getNodes()
         for node in nodes:
             if isinstance(nodes[node], AmiNemNode):
-                #nodes[node].query()
+                nodes[node].query()
                 nodes[node].reportDrivers()
                 self.discover()
-                time.sleep(.5)
+                time.sleep(10)
 
     def query(self,command=None):
         self.discover()
