@@ -100,8 +100,7 @@ class AmiNemNode(udi_interface.Node):
 
     def query(self,command=None):
         self.reportDrivers()
-        self.poll(self)
-
+        
     
     drivers = [
         {'driver': 'ST', 'value': 0, 'uom': 2},
