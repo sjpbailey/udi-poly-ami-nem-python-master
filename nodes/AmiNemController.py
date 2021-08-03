@@ -99,7 +99,6 @@ class AmiNemController(udi_interface.Node):
         if 'longPoll' in flag:
             LOGGER.debug('longPoll (controller)')
             self.heartbeat()
-            self.query()
             self.reportDrivers()
         else:
             LOGGER.debug('shortPoll (controller)')
