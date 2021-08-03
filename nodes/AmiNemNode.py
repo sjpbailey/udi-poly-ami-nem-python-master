@@ -49,13 +49,13 @@ class AmiNemNode(udi_interface.Node):
             prevs_count = 0
             sumss_count = 0
 
-        amiem_resp = self.get_request(amiem_url)
+        amiem_resp = self.get_request(amiem_url) #Current Demand kW
         if amiem_resp is not None:
             amiem_root = ET.fromstring(amiem_resp)
             for amie in amiem_root.iter('instantaneousDemand'):
                 amiem_count = float(amie.text)
         
-        amiem1_resp = self.get_request(amiem_url)
+        amiem1_resp = self.get_request(amiem_url) #Current Demand Watts
         if amiem1_resp is not None:
             amiem1_root = ET.fromstring(amiem1_resp)
             for amie1 in amiem1_root.iter('instantaneousDemand'):
@@ -73,7 +73,7 @@ class AmiNemNode(udi_interface.Node):
             for prev in prevs_root.iter('previousDayDelivered'):
                 prevs_count = float(prev.text)     
 
-        sumss_resp = self.get_request(amiem_url) #Previous Day Delivered
+        sumss_resp = self.get_request(amiem_url) #Sum Delivered
         if sumss_resp is not None:
             sumss_root = ET.fromstring(sumss_resp)
             for sums in sumss_root.iter('currSumDelivered'):
@@ -103,7 +103,6 @@ class AmiNemNode(udi_interface.Node):
         
     
     drivers = [
-        {'driver': 'ST', 'value': 0, 'uom': 2},
         {'driver': 'GPV', 'value': 0, 'uom': 2},
         {'driver': 'CC', 'value': 0, 'uom': 30},
         {'driver': 'GV1', 'value': 0, 'uom': 73},
