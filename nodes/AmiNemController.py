@@ -96,14 +96,20 @@ class AmiNemController(udi_interface.Node):
         LOGGER.info('New log level: {}'.format(level))
 
     def poll(self, flag):
-        timeout = self.zone_query_delay_ms #int(self.zone_query_delay_ms)
+        if 'longPoll' in flag:
+            LOGGER.debug('longPoll (controller)')
+            self.heartbeat()
+        else:
+            LOGGER.debug('shortPoll (controller)')
+        
+        """timeout = self.zone_query_delay_ms #int(self.zone_query_delay_ms)
         nodes = self.poly.getNodes()
         for node in nodes:
             if isinstance(nodes[node], AmiNemNode):
                 nodes[node].query()
                 nodes[node].reportDrivers()
                 self.discover()
-                time.sleep(10)
+                time.sleep(10)"""
 
     def query(self,command=None):
         self.discover()
