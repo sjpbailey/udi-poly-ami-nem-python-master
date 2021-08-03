@@ -150,7 +150,7 @@ class AmiNemController(udi_interface.Node):
         default_password = "YourPassword"
         default_isy_ip = "127.0.0.1"
         default_nem_oncor = "1000"
-        default_polltime = "1000"
+        #default_polltime = "1000"
 
         self.user = self.Parameters.user
         if self.user is None:
@@ -176,11 +176,11 @@ class AmiNemController(udi_interface.Node):
             LOGGER.error('check_params: Devisor for Oncor Meters not defined in customParams, please add it.  Using {}'.format(default_nem_oncor))
             self.nem_oncor = default_nem_oncor 
 
-        self.polltime = self.Parameters.polltime
+        """self.polltime = self.Parameters.polltime
         if self.polltime is None:
             self.polltime = default_polltime
             LOGGER.error('check_params: Poll Timer in ms not defined in customParams, please add it.  Using {}'.format(default_polltime))
-            self.polltime = default_polltime      
+            self.polltime = default_polltime"""      
         
         # Add a notice if they need to change the user/password from the default.
         if self.user == default_user or self.password == default_password:
