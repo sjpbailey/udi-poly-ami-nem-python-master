@@ -15,7 +15,8 @@
 		"user": "admin",
 		"password": "Your ISY Password",
 		"isy_ip": "192.168.1.00",
-		"nem_oncor": "1000"
+		"nem_oncor": "1000",
+		"polltime": "1000"
 	},
 	"credits": [
 		{
