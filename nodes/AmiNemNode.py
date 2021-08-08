@@ -26,7 +26,7 @@ class AmiNemNode(udi_interface.Node):
 
     def get_request(self, url):
         try:
-            r = requests.get(url, auth=HTTPBasicAuth(self.user, self.password, "http://" + self.isy_ip + "/rest/emeter"))
+            r = requests.get(url, auth=HTTPBasicAuth("http://" + self.isy_ip + self.user + self.password + "/rest/emeter"))
             if r.status_code == requests.codes.ok:
                 LOGGER.info(r.content)
 
