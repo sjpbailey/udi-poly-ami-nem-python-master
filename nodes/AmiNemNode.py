@@ -26,7 +26,7 @@ class AmiNemNode(udi_interface.Node):
 
     def get_request(self, url):
         try:
-            r = requests.get(url, auth=HTTPBasicAuth(self.user, self.password))
+            r = requests.get(url, auth=HTTPBasicAuth(self.user, self.password, "http://" + self.isy_ip + "/rest/emeter"))
             if r.status_code == requests.codes.ok:
                 LOGGER.info(r.content)
 
@@ -41,7 +41,7 @@ class AmiNemNode(udi_interface.Node):
     def start(self):
         if self.isy_ip is not None:
             self.setDriver('GPV', 1)
-            amiem_url = "http://" + self.isy_ip + "/rest/emeter"
+            amiem_url = "url" #"http://" + self.isy_ip + "/rest/emeter"
             
             amiem_count = 0
             amiem_count1 = 0
