@@ -176,8 +176,8 @@ class AmiNemController(udi_interface.Node):
             self.polltime = default_polltime      
         
         # Add a notice if they need to change the user/password from the default.
-        if self.user == default_user or self.password == default_password:
-            self.Notices['auth'] = 'Please set proper user and password in configuration page'
+        if self.user == default_isy_ip:
+            self.Notices['auth'] = 'Please set proper user, password and ip adress in configuration page'
 
     def remove_notices_all(self,command):
         LOGGER.info('remove_notices_all: notices={}'.format(self.Notices))
