@@ -112,7 +112,7 @@ class AmiNemController(udi_interface.Node):
             nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
-        if self.isy_ip is not None:
+        if self.isy_ip != "127.0.0.1":
             self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid',
             'Net Energy Meter', self.isy_ip, self.user, self.password, self.nem_oncor))
 
@@ -139,7 +139,7 @@ class AmiNemController(udi_interface.Node):
 
     def check_params(self):
         self.Notices.clear()
-        default_user = "YourUserName"
+        default_user = "admin"
         default_password = "YourPassword"
         default_isy_ip = "127.0.0.1"
         default_nem_oncor = "1000"

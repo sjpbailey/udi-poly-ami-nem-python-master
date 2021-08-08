@@ -13,8 +13,8 @@
 	"profile_version": "3.2.0",
 	"customParams": {
 		"user": "admin",
-		"password": "Your ISY Password",
-		"isy_ip": "192.168.1.00",
+		"password": "YourPassword",
+		"isy_ip": "127.0.0.1",
 		"nem_oncor": "1000",
 		"polltime": "1000"
 	},
