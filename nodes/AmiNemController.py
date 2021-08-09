@@ -69,11 +69,6 @@ class AmiNemController(udi_interface.Node):
         # for display in the dashboard.
         self.poly.setCustomParamsDoc()
 
-        # Initializing a heartbeat is an example of something you'd want
-        # to do during start.  Note that it is not required to have a
-        # heartbeat in your node server
-        self.heartbeat(0)
-
         # Device discovery. Here you may query for your device(s) and 
         # their capabilities.  Also where you can create nodes that
         # represent the found device(s)
@@ -115,18 +110,6 @@ class AmiNemController(udi_interface.Node):
 
     def stop(self):
         LOGGER.debug('AMI NEM NodeServer stopped.')
-
-    def heartbeat(self,init=False):
-        LOGGER.debug('heartbeat: init={}'.format(init))
-        if init is not False:
-            self.hb = init
-        LOGGER.debug('heartbeat: hb={}'.format(self.hb))
-        if self.hb == 0:
-            self.reportCmd("DON",2)
-            self.hb = 1
-        else:
-            self.reportCmd("DOF",2)
-            self.hb = 0
 
     def set_module_logs(self,level):
         LOGGER.getLogger('urllib3').setLevel(level)   ### Line was logging.getLogger('urllib3').setLevel(level) logging is not recognized? Logging also does not manually set in polyglot?
