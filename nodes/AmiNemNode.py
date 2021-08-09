@@ -38,7 +38,7 @@ class AmiNemNode(udi_interface.Node):
         except requests.exceptions.RequestException as e:
             LOGGER.error("Error: " + str(e))
             
-    def update(self):
+    def update(self, force):
         amiem_count = 0
         amiem_count1 = 0
         ustdy_count = 0
@@ -83,24 +83,24 @@ class AmiNemNode(udi_interface.Node):
         LOGGER.info("kWh: " + str(prevs_count))
         LOGGER.info("kWh: " + str(sumss_count))
         # Set Drivers
-        self.setDriver('CC', amiem_count/float(self.nem_oncor))
-        self.setDriver('GV1', amiem_count1/float(self.nem_oncor)*1000)
-        self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
-        self.setDriver('GV2', prevs_count/float(self.nem_oncor))
-        self.setDriver('GV3', sumss_count/float(self.nem_oncor))
+        self.setDriver('CC', amiem_count/float(self.nem_oncor), True, force)
+        self.setDriver('GV1', amiem_count1/float(self.nem_oncor)*1000, True, force)
+        self.setDriver('TPW', ustdy_count/float(self.nem_oncor), True, force)
+        self.setDriver('GV2', prevs_count/float(self.nem_oncor), True, force)
+        self.setDriver('GV3', sumss_count/float(self.nem_oncor), True, force)
     
     def start(self):
         if self.isy_ip is not None:
             self.setDriver('GPV', 1)
             self.amiem_url = "http://" + self.isy_ip + "/rest/emeter"
-            self.update()  # Get initial values immediately
+            self.update(True)  # Get initial values immediately
 
     def poll(self, polltype):
         if 'shortPoll' in polltype:
-            self.update()
+            self.update(False)
 
     def query(self,command=None):
-        self.update()
+        self.update(True)
         
     
     drivers = [
