@@ -88,17 +88,22 @@ class AmiNemController(udi_interface.Node):
         self.check_params()
 
     def poll(self, flag):
+        '''
+        Do nothing here.  The nodes responds to poll events directly
+
         timeout = self.zone_query_delay_ms #int(self.zone_query_delay_ms)
         nodes = self.poly.getNodes()
         for node in nodes:
             if isinstance(nodes[node], AmiNemNode):
                 nodes[node].query()
                 time.sleep(.5)
+        '''
 
     def query(self,command=None):
         nodes = self.poly.getNodes()
         for node in nodes:
-            nodes[node].reportDrivers()
+            if isinstance(nodes[node], AmiNemNode):
+                nodes[node].query()
 
     def discover(self, *args, **kwargs):
         if self.isy_ip != "127.0.0.1":
