@@ -6,13 +6,9 @@
         <sts>
 		    <st id="ST" editor="bool" />
             
-	</sts>
+        </sts>
         <cmds>
-            <sends>
-            <!-- These are for our heartbeat -->
-            <cmd id="DON" />
-            <cmd id="DOF" />
-            </sends>
+			<sends />
             <accepts>
             <cmd id="QUERY" />
             <cmd id="DISCOVER" />
