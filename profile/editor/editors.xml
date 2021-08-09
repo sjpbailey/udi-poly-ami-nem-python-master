@@ -17,7 +17,7 @@
     </editor>
     
     <editor id="KWH">
-        <range uom="33" min="-100000" max="100000" prec="1" />
+        <range uom="33" min="-2147483647" max="2147483647" prec="1" />
         </editor>
     
     <editor id="RAWVAL">
