@@ -15,7 +15,6 @@ class AmiNemNode(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name, isy_ip, user, password, nem_oncor):
         super(AmiNemNode, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
-        self.lpfx = '%s:%s' % (address,name)
 
         self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.POLL, self.poll)
@@ -23,6 +22,7 @@ class AmiNemNode(udi_interface.Node):
         self.user = user
         self.password = password
         self.nem_oncor = nem_oncor
+        self.amiem_url = ""
 
     def get_request(self, url):
         try:
@@ -37,43 +37,39 @@ class AmiNemNode(udi_interface.Node):
 
         except requests.exceptions.RequestException as e:
             LOGGER.error("Error: " + str(e))
-    
-    def start(self):
-        if self.isy_ip is not None:
-            self.setDriver('GPV', 1)
-            amiem_url = "http://" + self.isy_ip + "/rest/emeter"
             
-            amiem_count = 0
-            amiem_count1 = 0
-            ustdy_count = 0
-            prevs_count = 0
-            sumss_count = 0
+    def update(self):
+        amiem_count = 0
+        amiem_count1 = 0
+        ustdy_count = 0
+        prevs_count = 0
+        sumss_count = 0
 
-        amiem_resp = self.get_request(amiem_url) #Current Demand kW
+        amiem_resp = self.get_request(self.amiem_url) #Current Demand kW
         if amiem_resp is not None:
             amiem_root = ET.fromstring(amiem_resp)
             for amie in amiem_root.iter('instantaneousDemand'):
                 amiem_count = float(amie.text)
         
-        amiem1_resp = self.get_request(amiem_url) #Current Demand Watts
+        amiem1_resp = self.get_request(self.amiem_url) #Current Demand Watts
         if amiem1_resp is not None:
             amiem1_root = ET.fromstring(amiem1_resp)
             for amie1 in amiem1_root.iter('instantaneousDemand'):
                 amiem_count1 = float(amie1.text)        
 
-        ustdy_resp = self.get_request(amiem_url) #Current Daily Delivery
+        ustdy_resp = self.get_request(self.amiem_url) #Current Daily Delivery
         if ustdy_resp is not None:
             ustdy_root = ET.fromstring(ustdy_resp)
             for ustd in ustdy_root.iter('currDayDelivered'):
                 ustdy_count = float(ustd.text)
 
-        prevs_resp = self.get_request(amiem_url) #Previous Day Delivered
+        prevs_resp = self.get_request(self.amiem_url) #Previous Day Delivered
         if prevs_resp is not None:
             prevs_root = ET.fromstring(prevs_resp)
             for prev in prevs_root.iter('previousDayDelivered'):
                 prevs_count = float(prev.text)     
 
-        sumss_resp = self.get_request(amiem_url) #Sum Delivered
+        sumss_resp = self.get_request(self.amiem_url) #Sum Delivered
         if sumss_resp is not None:
             sumss_root = ET.fromstring(sumss_resp)
             for sums in sumss_root.iter('currSumDelivered'):
@@ -92,14 +88,19 @@ class AmiNemNode(udi_interface.Node):
         self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
         self.setDriver('GV2', prevs_count/float(self.nem_oncor))
         self.setDriver('GV3', sumss_count/float(self.nem_oncor))
+    
+    def start(self):
+        if self.isy_ip is not None:
+            self.setDriver('GPV', 1)
+            self.amiem_url = "http://" + self.isy_ip + "/rest/emeter"
+            self.update()  # Get initial values immediately
 
     def poll(self, polltype):
-        self.query()
-        self.reportDrivers()
-        LOGGER.debug('shortPoll (node)')
+        if 'shortPoll' in polltype:
+            self.update()
 
     def query(self,command=None):
-        self.reportDrivers()
+        self.update()
         
     
     drivers = [
