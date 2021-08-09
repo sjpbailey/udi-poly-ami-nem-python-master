@@ -49,9 +49,7 @@ class AmiNemController(udi_interface.Node):
         # the start event for each node you define.
 
         self.poly.subscribe(self.poly.START, self.start, address)
-        self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
         self.poly.subscribe(self.poly.CUSTOMPARAMS, self.parameterHandler)
-        #self.poly.subscribe(self.poly.CUSTOMTYPEDPARAMS, self.typedParameterHandler)
         self.poly.subscribe(self.poly.POLL, self.poll)
 
         # Tell the interface we have subscribed to all the events we need.
@@ -88,12 +86,6 @@ class AmiNemController(udi_interface.Node):
     def parameterHandler(self, params):
         self.Parameters.load(params)
         self.check_params()
-
-    def typedParameterHandler(self, params):
-        self.TypedParameters.load(params)
-
-    def handleLevelChange(self, level):
-        LOGGER.info('New log level: {}'.format(level))
 
     def poll(self, flag):
         timeout = self.zone_query_delay_ms #int(self.zone_query_delay_ms)
