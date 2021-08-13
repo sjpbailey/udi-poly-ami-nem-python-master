@@ -46,9 +46,6 @@ class AmiNemController(udi_interface.Node):
         # Tell the interface we exist.  
         self.poly.addNode(self)
         # Attributes
-        self.user = None
-        self.password = None
-        self.isy_ip = None
         self.nem_oncor = None
         self.isy = ISY(self.poly)
         self.poly = poly
