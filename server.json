@@ -12,6 +12,9 @@
 	"logLevel": "INFO",
 	"profile_version": "3.2.9",
 	"customParams": {
+		"user": "admin",
+        "password": "Your ISY Password",
+        "isy_ip": "host_or_IP",
 		"nem_oncor": "1000"
 	},
 	"credits": [

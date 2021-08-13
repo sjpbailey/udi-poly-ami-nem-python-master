@@ -17,7 +17,7 @@ if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([AmiNemController])
         polyglot.start()
-        control = AmiNemController(polyglot, 'controller', 'controller', 'poly', 'isy', 'PythonTemplate') # 'poly', 'isy', 
+        control = AmiNemController(polyglot, 'controller', 'controller', 'PythonTemplate') # 'poly', 'isy', 
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
         LOGGER.warning("Received interrupt or exit...")
