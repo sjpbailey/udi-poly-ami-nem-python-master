@@ -8,8 +8,6 @@ import udi_interface
 import sys
 import time
 import urllib3
-import requests
-from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
 import re
 
