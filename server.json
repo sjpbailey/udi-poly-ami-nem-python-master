@@ -1,0 +1,36 @@
+{
+	"name": "AMINEM",
+	"docs": "https://github.com/sjpbailey/udi-poly-ami-nem-python-master",
+	"type": "python3",
+	"executable": "Ami-NEM-poly.py",
+	"install": "install.sh",
+	"description": "Net Energy Meter Utility Meter Smart Meter Landis+Gy & Oncor",
+	"notice": "Used for your utility meter attached to your ISY",
+	"shortPoll": "60",
+	"longPoll": "120",
+	"testMode": false,
+	"logLevel": "INFO",
+	"profile_version": "3.2.9",
+	"customParams": {
+		"nem_oncor": "1000"
+	},
+	"credits": [
+		{
+			"title": "AMI-NEM: AMI-NEM Net Energy Meter",
+			"author": "Steve Bailey (SJPBailey)",
+			"version": "3.2.9",
+			"date": "July 30, 2021",
+			"source": "https://github.com/sjpbailey/udi-poly-ami-nem-python-master",
+			"license": "https://github.com/sjpbailey/udi-poly-ami-nem-python-master/LICENSE"
+		}
+	],
+	"store": {
+		"developer": "Steve Bailey sjpbailey1961@gmail.com",
+		"purchaseOptions": [
+			{
+				"isPerpetual": true,
+				"price": 0
+			}
+		]
+	}
+}
