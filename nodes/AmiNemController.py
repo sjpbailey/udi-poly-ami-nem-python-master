@@ -102,7 +102,7 @@ class AmiNemController(udi_interface.Node):
                 sumss_count = float(sums.text)
                 LOGGER.info("kWh: " + str(sumss_count))
 
-                self.setDriver('CC', amiem_count/float(self.nem_oncor), force=True)
+                self.setDriver('CC', str(amiem_count/float(self.nem_oncor)), force=True)
                 #self.setDriver('GV1', amiem_count1/float(self.nem_oncor)*1000)
                 #self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
                 #self.setDriver('GV2', prevs_count/float(self.nem_oncor))
