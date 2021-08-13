@@ -4,7 +4,7 @@
     <nodeDef id="controller" nls="ctl">
         <editors />
         <sts>
-		    <st id="ST" editor="bool" />
+		    <!--<st id="ST" editor="bool" />-->
             <st id="CC" editor="CC1" />
             <st id="GV1" editor="WATT" />
             <st id="GV21" editor="RAWVAL" />
