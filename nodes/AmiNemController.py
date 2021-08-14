@@ -100,6 +100,10 @@ class AmiNemController(udi_interface.Node):
 
 
     def start(self):
+        # Attributes
+        self.nem_oncor = None
+        self.isy = ISY(self.poly)
+        self.poly = poly
         """
         The Polyglot v3 Interface will publish an event to let you know you
         can start your integration. (see the START event subscribed to above)
@@ -222,10 +226,7 @@ class AmiNemController(udi_interface.Node):
             nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
-        # Attributes
-        self.nem_oncor = None
-        self.isy = ISY(self.poly)
-        self.poly = poly
+        
         """
         Example
         Do discovery here. Does not have to be called discovery. Called from
