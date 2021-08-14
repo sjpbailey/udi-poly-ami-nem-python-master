@@ -54,7 +54,7 @@ class AmiNemController(udi_interface.Node):
       reportDrivers(): Send all driver values to the ISY
       status()
     """
-    def __init__(self, polyglot, primary, address, name, poly, isy, nem_oncor):
+    def __init__(self, polyglot, primary, address, name, poly, isy):
         """
         Optional.
         Super runs all the parent class necessities. You do NOT have
