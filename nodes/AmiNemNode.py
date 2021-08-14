@@ -53,7 +53,7 @@ class AmiNemNode(udi_interface.Node):
         self.poly.subscribe(self.poly.POLL, self.poll)
 
     def start(self):
-        self.http = urllib3.PoolManager()
+        self.isy = ISY(self.poly)
         amiem_resp = self.isy.cmd("/rest/emeter")
 
         amiem_count = 0
@@ -97,6 +97,7 @@ class AmiNemNode(udi_interface.Node):
         if amiem_count is not None:
             self.setDriver('GPV', 1)
         pass        
+        #self.http = urllib3.PoolManager()
 
     def poll(self, polltype):
         if 'longPoll' in polltype:
