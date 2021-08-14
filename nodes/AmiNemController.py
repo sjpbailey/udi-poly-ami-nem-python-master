@@ -67,6 +67,11 @@ class AmiNemController(udi_interface.Node):
         self.name = 'Net Energy Meter Controller'  # override what was passed in
         self.hb = 0
 
+        # Attributes
+        self.nem_oncor = None
+        self.isy = ISY(self.poly)
+        self.poly = poly
+
         # Create data storage classes to hold specific data that we need
         # to interact with.  
         self.Parameters = Custom(polyglot, 'customparams')
