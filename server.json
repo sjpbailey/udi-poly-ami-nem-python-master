@@ -10,18 +10,18 @@
 	"longPoll": "120",
 	"testMode": false,
 	"logLevel": "INFO",
-	"profile_version": "3.2.9",
+	"profile_version": "3.3.0",
 	"customParams": {
 		"user": "admin",
         "password": "Your ISY Password",
         "isy_ip": "host_or_IP",
-		"nem_oncor": "1000"
+		"nem_oncor": ""
 	},
 	"credits": [
 		{
 			"title": "AMI-NEM: AMI-NEM Net Energy Meter",
 			"author": "Steve Bailey (SJPBailey)",
-			"version": "3.2.9",
+			"version": "3.3.0",
 			"date": "July 30, 2021",
 			"source": "https://github.com/sjpbailey/udi-poly-ami-nem-python-master",
 			"license": "https://github.com/sjpbailey/udi-poly-ami-nem-python-master/LICENSE"

@@ -3,6 +3,7 @@ import udi_interface
 import sys
 import time
 import urllib3
+import xml.etree.ElementTree as ET
 
 LOGGER = udi_interface.LOGGER
 
@@ -14,7 +15,7 @@ class AmiNemNode(udi_interface.Node):
     Class Variables:
     self.primary: String address of the parent node.
     self.address: String address of this Node 14 character limit.
-                  (ISY limitation)
+                (ISY limitation)
     self.added: Boolean Confirmed added to ISY
 
     Class Methods:
@@ -28,7 +29,7 @@ class AmiNemNode(udi_interface.Node):
     query(): Called when ISY sends a query request to Polyglot for this
         specific node
     """
-    def __init__(self, polyglot, primary, address, name):
+    def __init__(self, polyglot, primary, address, name, poly, isy, nem_oncor):
         """
         Optional.
         Super runs all the parent class necessities. You do NOT have
@@ -42,33 +43,62 @@ class AmiNemNode(udi_interface.Node):
         super(AmiNemNode, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
         self.lpfx = '%s:%s' % (address,name)
+        
+        # Attributes
+        self.poly = poly
+        self.isy = ISY(self.poly)
+        self.nem_oncor = nem_oncor
 
         self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.POLL, self.poll)
 
     def start(self):
-        """
-        Optional.
-        This method is called after Polyglot has added the node per the
-        START event subscription above
-        """
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 1)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 0)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 1)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 0)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
         self.http = urllib3.PoolManager()
+        amiem_resp = self.isy.cmd("/rest/emeter")
+
+        amiem_count = 0
+        amiem_count1 = 0
+        ustdy_count = 0
+        prevs_count = 0
+        sumss_count = 0
+
+        if amiem_resp is not None:
+            amiem_root = ET.fromstring(amiem_resp)
+
+            #amiem_count = float(amiem_root('instantaneousDemand'))
+            for amie in amiem_root.iter('instantaneousDemand'):
+                amiem_count = float(amie.text)
+                LOGGER.info("kW: " + str(amiem_count/float(self.nem_oncor)))
+                self.setDriver('CC', amiem_count/float(self.nem_oncor))
+                
+            #amiem_count1 = float(amiem_root.iter('instantaneousDemand'))
+            for amie1 in amiem_root.iter('instantaneousDemand'):
+                amiem_count1 = float(amie1.text)
+                LOGGER.info("WATTS: " + str(amiem_count1))
+                #self.setDriver('GV1', amiem_count1/float(self.nem_oncor)*1000)
+
+            #ustdy_count = float(amiem_root.iter('currDayDelivered'))
+            for ustd in amiem_root.iter('currDayDelivered'):
+                ustdy_count = float(ustd.text)
+                LOGGER.info("kWh: " + str(ustdy_count))
+                #self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
+
+            #prevs_count = float(amiem_root.iter('previousDayDelivered'))
+            for prev in amiem_root.iter('previousDayDelivered'):
+                prevs_count = float(prev.text)
+                LOGGER.info("kWh: " + str(prevs_count))
+                #self.setDriver('GV2', prevs_count/float(self.nem_oncor))
+
+            #sumss_count = float(amiem_root.iter('currSumDelivered')#.text)
+            for sums in amiem_root.iter('currSumDelivered'):
+                sumss_count = float(sums.text)
+                LOGGER.info("kWh: " + str(sumss_count))
+                #self.setDriver('GV3', sumss_count/float(self.nem_oncor))
+        if amiem_count is not None:
+            self.setDriver('GPV', 1)
+        pass        
 
     def poll(self, polltype):
-        """
-        This method is called at the poll intervals per the POLL event
-        subscription during init.
-        """
-
         if 'longPoll' in polltype:
             LOGGER.debug('longPoll (node)')
         else:
@@ -79,39 +109,9 @@ class AmiNemNode(udi_interface.Node):
                 self.setDriver('ST',1)
             LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
 
-    def cmd_on(self, command):
-        """
-        Example command received from ISY.
-        Set DON on TemplateNode.
-        Sets the ST (status) driver to 1 or 'True'
-        """
-        self.setDriver('ST', 1)
-
-    def cmd_off(self, command):
-        """
-        Example command received from ISY.
-        Set DOF on TemplateNode
-        Sets the ST (status) driver to 0 or 'False'
-        """
-        self.setDriver('ST', 0)
-
-    def cmd_ping(self,command):
-        """
-        Not really a ping, but don't care... It's an example to test LOGGER
-        in a module...
-        """
-        LOGGER.debug("cmd_ping:")
-        r = self.http.request('GET',"google.com")
-        LOGGER.debug("cmd_ping: r={}".format(r))
-
-
     def query(self,command=None):
-        """
-        Called by ISY to report all drivers for this node. This is done in
-        the parent class, so you don't need to override this method unless
-        there is a need.
-        """
         self.reportDrivers()
+        LOGGER.debug("cmd_query:")
 
     """
     Optional.
@@ -120,20 +120,27 @@ class AmiNemNode(udi_interface.Node):
     of variable to display. Check the UOM's in the WSDK for a complete list.
     UOM 2 is boolean so the ISY will display 'True/False'
     """
-    drivers = [{'driver': 'ST', 'value': 0, 'uom': 2}]
+    drivers = [
+        {'driver': 'ST', 'value': 0, 'uom': 2},
+        {'driver': 'GPV', 'value': 0, 'uom': 2},
+        {'driver': 'CC', 'value': 0, 'uom': 30},
+        {'driver': 'GV1', 'value': 0, 'uom': 73},
+        {'driver': 'TPW', 'value': 0, 'uom': 33},
+        {'driver': 'GV2', 'value': 0, 'uom': 33},
+        {'driver': 'GV3', 'value': 0, 'uom': 33},
+        ]
 
     """
     id of the node from the nodedefs.xml that is in the profile.zip. This tells
     the ISY what fields and commands this node has.
     """
-    id = 'templatenodeid'
+    id = 'aminemnodeid'
 
     """
     This is a dictionary of commands. If ISY sends a command to the NodeServer,
     this tells it which method to call. DON calls setOn, etc.
     """
     commands = {
-                    'DON': cmd_on,
-                    'DOF': cmd_off,
-                    'PING': cmd_ping
+                    
+                    'PING': query
                 }

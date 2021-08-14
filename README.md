@@ -23,7 +23,7 @@ Adds your Smart Meter in the Administrative Console instead of just in the Event
 
 * Default Short Poll:  Every 5 minutes
 * Default Long Poll: Every 10 minutes (heartbeat)
-* Your ISY nem_oncor: input 1000 for Landis+Gyr, 10000 for Oncor Meters
+* nem_oncor: Input your Meter type, 1000 for Landis+Gyr, 10000 for Oncor Meters
 
 ##### User Provided
 
