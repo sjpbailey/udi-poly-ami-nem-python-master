@@ -124,7 +124,7 @@ class AmiNemController(udi_interface.Node):
         # Initializing a heartbeat is an example of something you'd want
         # to do during start.  Note that it is not required to have a
         # heartbeat in your node server
-        self.heartbeat(0)
+        #self.heartbeat(0)
 
         # Device discovery. Here you may query for your device(s) and 
         # their capabilities.  Also where you can create nodes that
