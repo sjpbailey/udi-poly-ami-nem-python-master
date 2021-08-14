@@ -52,7 +52,7 @@ class AmiNemController(udi_interface.Node):
 
         #self.poly.subscribe(self.poly.START, self.start, address)
         #self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
-        self.poly.subscribe(self.poly.CUSTOMPARAMS, self.parameterHandler)
+        #self.poly.subscribe(self.poly.CUSTOMPARAMS, self.parameterHandler)
         #self.poly.subscribe(self.poly.CUSTOMTYPEDPARAMS, self.typedParameterHandler)
         #self.poly.subscribe(self.poly.CUSTOMTYPEDDATA, self.typedDataHandler)
         #self.poly.subscribe(self.poly.POLL, self.poll)
