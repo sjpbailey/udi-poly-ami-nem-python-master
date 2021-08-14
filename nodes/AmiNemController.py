@@ -64,7 +64,7 @@ class AmiNemController(udi_interface.Node):
         """
         super(AmiNemController, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
-        self.name = 'Template Controller'  # override what was passed in
+        self.name = 'Net Energy Meter Controller'  # override what was passed in
         self.hb = 0
 
         # Create data storage classes to hold specific data that we need
@@ -226,7 +226,7 @@ class AmiNemController(udi_interface.Node):
         example controller start method and from DISCOVER command recieved
         from ISY as an exmaple.
         """
-        self.poly.addNode(TemplateNode(self.poly, self.address, 'aminemnodeid', 'Template Node Name'))
+        self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode'))
 
     def delete(self):
         """
@@ -276,6 +276,7 @@ class AmiNemController(udi_interface.Node):
         self.Notices['hello2'] = 'Hello Friends!'
         default_user = "YourUserName"
         default_password = "YourPassword"
+        default_nem_oncor = ""
 
         self.user = self.Parameters.user
         if self.user is None:
@@ -288,6 +289,12 @@ class AmiNemController(udi_interface.Node):
             self.password = default_password
             LOGGER.error('check_params: password not defined in customParams, please add it.  Using {}'.format(default_password))
             self.password = default_password
+
+        self.nem_oncor = self.Parameters.nem_oncor
+        if self.nem_oncor is None:
+            self.nem_oncor = default_nem_oncor
+            LOGGER.error('check_params: Devisor for Oncor Meters not defined in customParams, please add it.  Using {}'.format(default_nem_oncor))
+            self.nem_oncor = default_nem_oncor    
 
         # Add a notice if they need to change the user/password from the default.
         if self.user == default_user or self.password == default_password:
