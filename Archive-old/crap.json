@@ -1,5 +1,5 @@
         {   "user": "admin",
             "password": "Your ISY Password",
-            "isy_ip": "host_or_IP"
+            "isy_ip": "host_or_IP",
         }
         
