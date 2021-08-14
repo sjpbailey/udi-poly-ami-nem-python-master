@@ -54,7 +54,7 @@ class AmiNemController(udi_interface.Node):
       reportDrivers(): Send all driver values to the ISY
       status()
     """
-    def __init__(self, polyglot, primary, address, name, poly, isy):
+    def __init__(self, polyglot, primary, address, name):
         """
         Optional.
         Super runs all the parent class necessities. You do NOT have
@@ -135,10 +135,11 @@ class AmiNemController(udi_interface.Node):
         # than wait for a poll interval.  The user will get more 
         # immediate feedback that the node server is running
 
-        # Attributes
-        self.nem_oncor = None
-        self.isy = ISY(self.poly)
-        self.poly = poly
+    class isy:
+        def __init__(self, isy, poly):
+            # Attributes
+            self.isy = ISY(self.poly)
+            self.poly = poly
 
     """
     Called via the CUSTOMPARAMS event. When the user enters or
