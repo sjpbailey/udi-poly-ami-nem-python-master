@@ -3,7 +3,7 @@
 ND-controller-NAME = UTILITY METER CONTROLLER
 ND-controller-ICON = Electricity
 CMD-ctl-QUERY-NAME = Query
-CMD-ctl-DISCOVER-NAME = Re-Discover
+#CMD-ctl-DISCOVER-NAME = Re-Discover
 CMD-ctl-UPDATE_PROFILE-NAME = Update Profile
 CMD-ctl-REMOVE_NOTICES_ALL-NAME = Remove All Notices
 CMD-ctl-REMOVE_NOTICE_TEST-NAME = Remove Notice Test
