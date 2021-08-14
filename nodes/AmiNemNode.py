@@ -53,7 +53,7 @@ class AmiNemNode(udi_interface.Node):
         self.poly.subscribe(self.poly.POLL, self.poll)
 
     def start(self):
-        self.isy = ISY(self.poly)
+        isy = udi_interface.ISY()
         amiem_resp = self.isy.cmd("/rest/emeter")
 
         amiem_count = 0
