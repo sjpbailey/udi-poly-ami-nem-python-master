@@ -67,10 +67,7 @@ class AmiNemController(udi_interface.Node):
         self.name = 'Net Energy Meter Controller'  # override what was passed in
         self.hb = 0
 
-        # Attributes
-        self.nem_oncor = None
-        self.isy = ISY(self.poly)
-        self.poly = poly
+        
 
         # Create data storage classes to hold specific data that we need
         # to interact with.  
@@ -225,6 +222,10 @@ class AmiNemController(udi_interface.Node):
             nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
+        # Attributes
+        self.nem_oncor = None
+        self.isy = ISY(self.poly)
+        self.poly = poly
         """
         Example
         Do discovery here. Does not have to be called discovery. Called from
@@ -278,7 +279,7 @@ class AmiNemController(udi_interface.Node):
         """
         self.Notices.clear()
         self.Notices['hello'] = 'Hey there, my IP is {}'.format(self.poly.network_interface['addr'])
-        self.Notices['hello2'] = 'Hello Friends!'
+        #self.Notices['hello2'] = 'Hello Friends!'
         default_user = "YourUserName"
         default_password = "YourPassword"
         default_nem_oncor = ""
