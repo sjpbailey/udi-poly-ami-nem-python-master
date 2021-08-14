@@ -54,7 +54,7 @@ class AmiNemController(udi_interface.Node):
       reportDrivers(): Send all driver values to the ISY
       status()
     """
-    def __init__(self, polyglot, primary, address, name):
+    def __init__(self, polyglot, primary, address, name, poly, isy, nem_oncor):
         """
         Optional.
         Super runs all the parent class necessities. You do NOT have
@@ -226,7 +226,7 @@ class AmiNemController(udi_interface.Node):
         example controller start method and from DISCOVER command recieved
         from ISY as an exmaple.
         """
-        self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode'))
+        self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode', self.poly, self.isy, self.nem_oncor))
 
     def delete(self):
         """
