@@ -138,7 +138,7 @@ class AmiNemController(udi_interface.Node):
     class isy:
         def __init__(self, isy, poly):
             # Attributes
-            self.isy = udi_interface.ISY()
+            self.isy = udi_interface.ISY(poly)
             self.poly = poly
 
     """
@@ -231,7 +231,7 @@ class AmiNemController(udi_interface.Node):
 
     def check_params(self):
         self.Notices.clear()
-        self.Notices['hello'] = 'Polisy IP is {}'.format(self.poly.network_interface['addr'])
+        #self.Notices['hello'] = 'Polisy IP is {}'.format(self.poly.network_interface['addr'])
         default_nem_oncor = ""
 
         self.nem_oncor = self.Parameters.nem_oncor
