@@ -50,7 +50,7 @@ class AmiNemController(udi_interface.Node):
         # The START event is unique in that you can subscribe to 
         # the start event for each node you define.
 
-        self.poly.subscribe(self.poly.START, self.start, address)
+        #self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
         self.poly.subscribe(self.poly.CUSTOMPARAMS, self.parameterHandler)
         #self.poly.subscribe(self.poly.CUSTOMTYPEDPARAMS, self.typedParameterHandler)
