@@ -100,10 +100,7 @@ class AmiNemController(udi_interface.Node):
 
 
     def start(self):
-        # Attributes
-        self.nem_oncor = None
-        self.isy = ISY(self.poly)
-        self.poly = poly
+        
         """
         The Polyglot v3 Interface will publish an event to let you know you
         can start your integration. (see the START event subscribed to above)
@@ -137,6 +134,11 @@ class AmiNemController(udi_interface.Node):
         # Here you may want to send updated values to the ISY rather
         # than wait for a poll interval.  The user will get more 
         # immediate feedback that the node server is running
+
+        # Attributes
+        self.nem_oncor = None
+        self.isy = ISY(self.poly)
+        self.poly = poly
 
     """
     Called via the CUSTOMPARAMS event. When the user enters or
@@ -206,96 +208,31 @@ class AmiNemController(udi_interface.Node):
     def poll(self, flag):
         if 'longPoll' in flag:
             LOGGER.debug('longPoll (controller)')
-            self.heartbeat()
         else:
             LOGGER.debug('shortPoll (controller)')
 
     def query(self,command=None):
-        """
-        Optional.
-
-        The query method will be called when the ISY attempts to query the
-        status of the node directly.  You can do one of two things here.
-        You can send the values currently held by Polyglot back to the
-        ISY by calling reportDriver() or you can actually query the 
-        device represented by the node and report back the current 
-        status.
-        """
         nodes = self.poly.getNodes()
         for node in nodes:
             nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
-        
-        """
-        Example
-        Do discovery here. Does not have to be called discovery. Called from
-        example controller start method and from DISCOVER command recieved
-        from ISY as an exmaple.
-        """
+       
         self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode', self.poly, self.isy, self.nem_oncor))
 
     def delete(self):
-        """
-        Example
-        This is call3ed by Polyglot upon deletion of the NodeServer. If the
-        process is co-resident and controlled by Polyglot, it will be
-        terminiated within 5 seconds of receiving this message.
-        """
-        LOGGER.info('Oh God I\'m being deleted. Nooooooooooooooooooooooooooooooooooooooooo.')
+        LOGGER.info('Net Energy Meter deleted.')
 
     def stop(self):
-        """
-        This is called by Polyglot when the node server is stopped.  You have
-        the opportunity here to cleanly disconnect from your device or do
-        other shutdown type tasks.
-        """
         LOGGER.debug('NodeServer stopped.')
-
-
-    """
-    This is an example of implementing a heartbeat function.  It uses the
-    long poll intervale to alternately send a ON and OFF command back to
-    the ISY.  Programs on the ISY can then monitor this and take action
-    when the heartbeat fails to update.
-    """
-    def heartbeat(self,init=False):
-        LOGGER.debug('heartbeat: init={}'.format(init))
-        if init is not False:
-            self.hb = init
-        LOGGER.debug('heartbeat: hb={}'.format(self.hb))
-        if self.hb == 0:
-            self.reportCmd("DON",2)
-            self.hb = 1
-        else:
-            self.reportCmd("DOF",2)
-            self.hb = 0
 
     def set_module_logs(self,level):
         logging.getLogger('urllib3').setLevel(level)
 
     def check_params(self):
-        """
-        This is an example if using custom Params for user and password and an example with a Dictionary
-        """
         self.Notices.clear()
-        self.Notices['hello'] = 'Hey there, my IP is {}'.format(self.poly.network_interface['addr'])
-        #self.Notices['hello2'] = 'Hello Friends!'
-        default_user = "YourUserName"
-        default_password = "YourPassword"
+        self.Notices['hello'] = 'Polisy IP is {}'.format(self.poly.network_interface['addr'])
         default_nem_oncor = ""
-
-        self.user = self.Parameters.user
-        if self.user is None:
-            self.user = default_user
-            LOGGER.error('check_params: user not defined in customParams, please add it.  Using {}'.format(default_user))
-            self.user = default_user
-
-        self.password = self.Parameters.password
-        if self.password is None:
-            self.password = default_password
-            LOGGER.error('check_params: password not defined in customParams, please add it.  Using {}'.format(default_password))
-            self.password = default_password
 
         self.nem_oncor = self.Parameters.nem_oncor
         if self.nem_oncor is None:
@@ -304,9 +241,8 @@ class AmiNemController(udi_interface.Node):
             self.nem_oncor = default_nem_oncor    
 
         # Add a notice if they need to change the user/password from the default.
-        if self.user == default_user or self.password == default_password:
-            self.Notices['auth'] = 'Please set proper user and password in configuration page'
-            self.Notices['test'] = 'This is only a test'
+        if self.user == default_nem_oncor:
+            self.Notices['auth'] = 'Please set proper divisor in configuration page for Landis+Gy set to 1000 set to 10000 for Oncor'
 
         # Typed Parameters allow for more complex parameter entries.
         # It may be better to do this during __init__() 
@@ -397,11 +333,7 @@ class AmiNemController(udi_interface.Node):
             ], True)
             '''
 
-    def remove_notice_test(self,command):
-        LOGGER.info('remove_notice_test: notices={}'.format(self.Notices))
-        # Remove the test notice
-        self.Notices.delete('test')
-
+    
     def remove_notices_all(self,command):
         LOGGER.info('remove_notices_all: notices={}'.format(self.Notices))
         # Remove all existing notices
@@ -425,7 +357,7 @@ class AmiNemController(udi_interface.Node):
         'QUERY': query,
         'DISCOVER': discover,
         'REMOVE_NOTICES_ALL': remove_notices_all,
-        'REMOVE_NOTICE_TEST': remove_notice_test,
+        
     }
     drivers = [
         {'driver': 'ST', 'value': 1, 'uom': 2},
