@@ -218,7 +218,6 @@ class AmiNemController(udi_interface.Node):
             nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
-       
         self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode', self.poly, self.isy, self.nem_oncor))
 
     def delete(self):
@@ -242,7 +241,7 @@ class AmiNemController(udi_interface.Node):
             self.nem_oncor = default_nem_oncor    
 
         # Add a notice if they need to change the user/password from the default.
-        if self.user == default_nem_oncor:
+        if self.nem_oncor == default_nem_oncor:
             self.Notices['auth'] = 'Please set proper divisor in configuration page for Landis+Gy set to 1000 set to 10000 for Oncor'
 
         # Typed Parameters allow for more complex parameter entries.

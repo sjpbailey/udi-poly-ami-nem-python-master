@@ -46,7 +46,7 @@ class AmiNemNode(udi_interface.Node):
         
         # Attributes
         self.poly = poly
-        self.isy = ISY(self.poly)
+        self.isy = isy
         self.nem_oncor = nem_oncor
 
         self.poly.subscribe(self.poly.START, self.start, address)
