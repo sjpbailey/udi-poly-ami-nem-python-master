@@ -59,7 +59,7 @@ class AmiNemController(udi_interface.Node):
 
         # Tell the interface we have subscribed to all the events we need.
         # Once we call ready(), the interface will start publishing data.
-        self.poly.ready()
+        #self.poly.ready()
 
         # Tell the interface we exist.  
         self.poly.addNode(self)
