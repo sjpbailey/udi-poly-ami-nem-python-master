@@ -5,13 +5,9 @@ Get the polyinterface objects we need.
 a different Python module which doesn't have the new LOG_HANDLER functionality
 """
 import udi_interface
-import sys
-import time
-import urllib3
-import requests
-from requests.auth import HTTPBasicAuth
-import xml.etree.ElementTree as ET
-import re
+
+# My Template Node
+from nodes import AmiNemNode
 
 """
 Some shortcuts for udi interface components
@@ -32,182 +28,225 @@ class AmiNemController(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name):
         super(AmiNemController, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
-        self.name = 'AMI NEM Controller'  # override what was passed in
+        self.name = 'Net Energy Meter Controller'  # override what was passed in
         self.hb = 0
+
+        # to interact with.  
         self.Parameters = Custom(polyglot, 'customparams')
         self.Notices = Custom(polyglot, 'notices')
-        
+        self.TypedParameters = Custom(polyglot, 'customtypedparams')
+        self.TypedData = Custom(polyglot, 'customtypeddata')
+
         self.poly.subscribe(self.poly.START, self.start, address)
-        #self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
+        self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
         self.poly.subscribe(self.poly.CUSTOMPARAMS, self.parameterHandler)
+        self.poly.subscribe(self.poly.CUSTOMTYPEDPARAMS, self.typedParameterHandler)
+        self.poly.subscribe(self.poly.CUSTOMTYPEDDATA, self.typedDataHandler)
         self.poly.subscribe(self.poly.POLL, self.poll)
+
         # Tell the interface we have subscribed to all the events we need.
         # Once we call ready(), the interface will start publishing data.
         self.poly.ready()
+
         # Tell the interface we exist.  
         self.poly.addNode(self)
-        # Attributes
-        self.user = None
-        self.password = None
-        self.isy_ip = None
-        self.nem_oncor = None
+
+
+
+    def start(self):
+        self.poly.updateProfile()
+        self.poly.setCustomParamsDoc()
+        self.discover()
+    class isy:
+        def __init__(self, isy, poly):
+            # Attributes
+            self.isy = udi_interface.ISY(poly)
+            self.poly = poly
 
     def parameterHandler(self, params):
         self.Parameters.load(params)
         LOGGER.debug('Loading parameters now')
-        self.check_params()    
-    
-    def start(self):
-        self.poly.updateProfile()
-        self.discover()
+        self.check_params()
 
-    def get_request(self, url):
-        try:
-            r = requests.get(url, auth=HTTPBasicAuth(self.user, self.password))
-            if r.status_code == requests.codes.ok:
-                LOGGER.info(r.content)
+    def typedParameterHandler(self, params):
+        self.TypedParameters.load(params)
+        LOGGER.debug('Loading typed parameters now')
+        LOGGER.debug(params)
 
-                return r.content
-            else:
-                LOGGER.error("ISY-Inventory.get_request:  " + r.content)
-                return None
+    def typedDataHandler(self, params):
+        self.TypedData.load(params)
+        LOGGER.debug('Loading typed data now')
+        LOGGER.debug(params)
 
-        except requests.exceptions.RequestException as e:
-            LOGGER.error("Error: " + str(e))    
+    """
+    Called via the LOGLEVEL event.
+    """
+    def handleLevelChange(self, level):
+        LOGGER.info('New log level: {}'.format(level))
 
-    def discover(self, *args, **kwargs):
-        if self.isy_ip is not None:
-            self.setDriver('GPV', 1)
-            amiem_url = "http://" + self.isy_ip + "/rest/emeter"
-            
-            amiem_count = 0
-            amiem_count1 = 0
-            ustdy_count = 0
-            prevs_count = 0
-            sumss_count = 0
+    """
+    Called via the POLL event.  The POLL event is triggerd at
+    the intervals specified in the node server configuration. There
+    are two separate poll events, a long poll and a short poll. Which
+    one is indicated by the flag.  flag will hold the poll type either
+    'longPoll' or 'shortPoll'.
 
-        amiem_resp = self.get_request(amiem_url) #Current Demand kW
-        if amiem_resp is not None:
-            amiem_root = ET.fromstring(amiem_resp)
-            for amie in amiem_root.iter('instantaneousDemand'):
-                amiem_count = float(amie.text)
-        
-        amiem1_resp = self.get_request(amiem_url) #Current Demand Watts
-        if amiem1_resp is not None:
-            amiem1_root = ET.fromstring(amiem1_resp)
-            for amie1 in amiem1_root.iter('instantaneousDemand'):
-                amiem_count1 = float(amie1.text)        
-
-        ustdy_resp = self.get_request(amiem_url) #Current Daily Delivery
-        if ustdy_resp is not None:
-            ustdy_root = ET.fromstring(ustdy_resp)
-            for ustd in ustdy_root.iter('currDayDelivered'):
-                ustdy_count = float(ustd.text)
-
-        prevs_resp = self.get_request(amiem_url) #Previous Day Delivered
-        if prevs_resp is not None:
-            prevs_root = ET.fromstring(prevs_resp)
-            for prev in prevs_root.iter('previousDayDelivered'):
-                prevs_count = float(prev.text)     
-
-        sumss_resp = self.get_request(amiem_url) #Sum Delivered
-        if sumss_resp is not None:
-            sumss_root = ET.fromstring(sumss_resp)
-            for sums in sumss_root.iter('currSumDelivered'):
-                sumss_count = float(sums.text)     
-
-        #if amiem_count is not None:
-        LOGGER.info("kW: " + str(amiem_count/float(self.nem_oncor)))
-        LOGGER.info("WATTS: " + str(amiem_count1))
-        LOGGER.info("kWh: " + str(ustdy_count))
-        LOGGER.info("kWh: " + str(prevs_count))
-        LOGGER.info("kWh: " + str(sumss_count))
-        
-        # Set Drivers
-        self.setDriver('CC', amiem_count/float(self.nem_oncor))
-        self.setDriver('GV1', amiem_count1/float(self.nem_oncor)*1000)
-        self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
-        self.setDriver('GV2', prevs_count/float(self.nem_oncor))
-        self.setDriver('GV3', sumss_count/float(self.nem_oncor))
-
-    def delete(self):
-        LOGGER.info('Deleting AMI NEM, Net Energy Meter')
-
-    def stop(self):
-        LOGGER.debug('AMI NEM NodeServer stopped.')
-
-    def set_module_logs(self,level):
-        LOGGER.getLogger('urllib3').setLevel(level)
-
-    def check_params(self):
-        self.Notices.clear()
-        default_user = "admin"
-        default_password = "YourPassword"
-        default_isy_ip = "127.0.0.1"
-        default_nem_oncor = "1000"
-        
-        self.user = self.Parameters.user
-        if self.user is None:
-            self.user = default_user
-            LOGGER.error('check_params: user not defined in customParams, please add it.  Using {}'.format(default_user))
-            self.user = default_user
-
-        self.password = self.Parameters.password
-        if self.password is None:
-            self.password = default_password
-            LOGGER.error('check_params: password not defined in customParams, please add it.  Using {}'.format(default_password))
-            self.password = default_password
-        
-        self.isy_ip = self.Parameters.isy_ip
-        if self.isy_ip is None:
-            self.isy_ip = default_isy_ip
-            LOGGER.error('check_params: IP Address not defined in customParams, please add it.  Using {}'.format(default_isy_ip))
-            self.isy_ip = default_isy_ip
-
-        self.nem_oncor = self.Parameters.nem_oncor
-        if self.nem_oncor is None:
-            self.nem_oncor = default_nem_oncor
-            LOGGER.error('check_params: Devisor for Oncor Meters not defined in customParams, please add it.  Using {}'.format(default_nem_oncor))
-            self.nem_oncor = default_nem_oncor 
-        
-        # Add a notice if they need to change the user/password from the default.
-        if self.isy_ip == default_isy_ip:
-            self.Notices['auth'] = 'Please set proper ip adress in configuration page'
+    Use this if you want your node server to do something at fixed
+    intervals.
+    """
+    def poll(self, flag):
+        if 'longPoll' in flag:
+            LOGGER.debug('longPoll (controller)')
+        else:
+            LOGGER.debug('shortPoll (controller)')
 
     def query(self,command=None):
         nodes = self.poly.getNodes()
         for node in nodes:
             nodes[node].reportDrivers()
 
-    def poll(self, flag):
-        nodes = self.poly.getNodes()
-        self.discover()
-        for node in nodes:
-            nodes[node].reportDrivers()
-        if 'longPoll' in flag:
-            LOGGER.debug('longPoll (controller)')
-        else:
-            LOGGER.debug('shortPoll (controller)')
-            
+    def discover(self, *args, **kwargs):
+        self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode', self.poly, self.isy, self.nem_oncor))
 
+    def delete(self):
+        LOGGER.info('Net Energy Meter deleted.')
+
+    def stop(self):
+        LOGGER.debug('NodeServer stopped.')
+
+    def set_module_logs(self,level):
+        logging.getLogger('urllib3').setLevel(level)
+
+    def check_params(self):
+        self.Notices.clear()
+        #self.Notices['hello'] = 'Polisy IP is {}'.format(self.poly.network_interface['addr'])
+        default_nem_oncor = ""
+
+        self.nem_oncor = self.Parameters.nem_oncor
+        if self.nem_oncor is None:
+            self.nem_oncor = default_nem_oncor
+            LOGGER.error('check_params: Devisor for Oncor Meters not defined in customParams, please add it.  Using {}'.format(default_nem_oncor))
+            self.nem_oncor = default_nem_oncor    
+
+        # Add a notice if they need to change the user/password from the default.
+        if self.nem_oncor == default_nem_oncor:
+            self.Notices['auth'] = 'Please set proper divisor in configuration page for Landis+Gy set to 1000 set to 10000 for Oncor'
+
+        # Typed Parameters allow for more complex parameter entries.
+        # It may be better to do this during __init__() 
+
+        # Lets try a simpler thing here
+        self.TypedParameters.load( [
+                {
+                    'name': 'template_test',
+                    'title': 'Test parameters',
+                    'desc': 'Test parameters for template',
+                    'isList': False,
+                    'params': [
+                        {
+                            'name': 'id',
+                            'title': 'The Item ID number',
+                            'isRequired': True,
+                        },
+                        {
+                            'name': 'level',
+                            'title': 'Level Parameter',
+                            'defaultValue': '100',
+                            'isRequired': True,
+                        }
+                    ]
+                }
+            ],
+            True
+        )
+
+        '''
+        self.TypedParameters.load( [
+                {
+                    'name': 'item',
+                    'title': 'Item',
+                    'desc': 'Description of Item',
+                    'isList': False,
+                    'params': [
+                        {
+                            'name': 'id',
+                            'title': 'The Item ID',
+                            'isRequired': True,
+                        },
+                        {
+                            'name': 'title',
+                            'title': 'The Item Title',
+                            'defaultValue': 'The Default Title',
+                            'isRequired': True,
+                        },
+                        {
+                            'name': 'extra',
+                            'title': 'The Item Extra Info',
+                            'isRequired': False,
+                        }
+                    ]
+                },
+                {
+                    'name': 'itemlist',
+                    'title': 'Item List',
+                    'desc': 'Description of Item List',
+                    'isList': True,
+                    'params': [
+                        {
+                            'name': 'id',
+                            'title': 'The Item ID',
+                            'isRequired': True,
+                        },
+                        {
+                            'name': 'title',
+                            'title': 'The Item Title',
+                            'defaultValue': 'The Default Title',
+                            'isRequired': True,
+                        },
+                        {
+                            'name': 'names',
+                            'title': 'The Item Names',
+                            'isRequired': False,
+                            'isList': True,
+                            'defaultValue': ['somename']
+                        },
+                        {
+                            'name': 'extra',
+                            'title': 'The Item Extra Info',
+                            'isRequired': False,
+                            'isList': True,
+                        }
+                    ]
+                },
+            ], True)
+            '''
+
+    
     def remove_notices_all(self,command):
         LOGGER.info('remove_notices_all: notices={}'.format(self.Notices))
         # Remove all existing notices
         self.Notices.clear()
 
+    """
+    Optional.
+    Since the controller is a node in ISY, it will actual show up as a node.
+    Thus it needs to know the drivers and what id it will use. The controller
+    should report the node server status and have any commands that are
+    needed to control operation of the node server.
+
+    Typically, node servers will use the 'ST' driver to report the node server
+    status and it a best pactice to do this unless you have a very good
+    reason not to.
+
+    The id must match the nodeDef id="controller" in the nodedefs.xml
+    """
     id = 'controller'
-    
     commands = {
         'QUERY': query,
-        #'DISCOVER': discover,
+        'DISCOVER': discover,
         'REMOVE_NOTICES_ALL': remove_notices_all,
+        
     }
     drivers = [
         {'driver': 'ST', 'value': 1, 'uom': 2},
-        {'driver': 'GPV', 'value': "Refresh", 'uom': 2},
-        {'driver': 'CC', 'value': "Refresh", 'uom': 30},
-        {'driver': 'GV1', 'value': "Refresh", 'uom': 73},
-        {'driver': 'TPW', 'value': "Refresh", 'uom': 33},
-        {'driver': 'GV2', 'value': "Refresh", 'uom': 33},
-        {'driver': 'GV3', 'value': "Refresh", 'uom': 33},
     ]
