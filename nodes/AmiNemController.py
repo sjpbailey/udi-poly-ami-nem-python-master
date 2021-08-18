@@ -94,6 +94,7 @@ class AmiNemController(udi_interface.Node):
             nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
+        self.isy = udi_interface.ISY(poly)
         self.poly.addNode(AmiNemNode(self.poly, self.address, 'aminemnodeid', 'AmiNemNode', self.poly, self.isy, self.nem_oncor))
 
     def delete(self):
