@@ -51,17 +51,15 @@ class AmiNemController(udi_interface.Node):
         # Tell the interface we exist.  
         self.poly.addNode(self)
 
-
-
     def start(self):
         self.poly.updateProfile()
         self.poly.setCustomParamsDoc()
         self.discover()
-    class isy:
-        def __init__(self, isy, poly):
+    #class isy:
+    #    def __init__(self, isy, poly):
             # Attributes
-            self.isy = udi_interface.ISY(poly)
-            self.poly = poly
+    #        self.isy = udi_interface.ISY(poly)
+    #        self.poly = poly
 
     def parameterHandler(self, params):
         self.Parameters.load(params)
@@ -84,16 +82,6 @@ class AmiNemController(udi_interface.Node):
     def handleLevelChange(self, level):
         LOGGER.info('New log level: {}'.format(level))
 
-    """
-    Called via the POLL event.  The POLL event is triggerd at
-    the intervals specified in the node server configuration. There
-    are two separate poll events, a long poll and a short poll. Which
-    one is indicated by the flag.  flag will hold the poll type either
-    'longPoll' or 'shortPoll'.
-
-    Use this if you want your node server to do something at fixed
-    intervals.
-    """
     def poll(self, flag):
         if 'longPoll' in flag:
             LOGGER.debug('longPoll (controller)')
@@ -120,7 +108,7 @@ class AmiNemController(udi_interface.Node):
     def check_params(self):
         self.Notices.clear()
         #self.Notices['hello'] = 'Polisy IP is {}'.format(self.poly.network_interface['addr'])
-        default_nem_oncor = ""
+        default_nem_oncor = "1000"
 
         self.nem_oncor = self.Parameters.nem_oncor
         if self.nem_oncor is None:
@@ -132,114 +120,12 @@ class AmiNemController(udi_interface.Node):
         if self.nem_oncor == default_nem_oncor:
             self.Notices['auth'] = 'Please set proper divisor in configuration page for Landis+Gy set to 1000 set to 10000 for Oncor'
 
-        # Typed Parameters allow for more complex parameter entries.
-        # It may be better to do this during __init__() 
-
-        # Lets try a simpler thing here
-        self.TypedParameters.load( [
-                {
-                    'name': 'template_test',
-                    'title': 'Test parameters',
-                    'desc': 'Test parameters for template',
-                    'isList': False,
-                    'params': [
-                        {
-                            'name': 'id',
-                            'title': 'The Item ID number',
-                            'isRequired': True,
-                        },
-                        {
-                            'name': 'level',
-                            'title': 'Level Parameter',
-                            'defaultValue': '100',
-                            'isRequired': True,
-                        }
-                    ]
-                }
-            ],
-            True
-        )
-
-        '''
-        self.TypedParameters.load( [
-                {
-                    'name': 'item',
-                    'title': 'Item',
-                    'desc': 'Description of Item',
-                    'isList': False,
-                    'params': [
-                        {
-                            'name': 'id',
-                            'title': 'The Item ID',
-                            'isRequired': True,
-                        },
-                        {
-                            'name': 'title',
-                            'title': 'The Item Title',
-                            'defaultValue': 'The Default Title',
-                            'isRequired': True,
-                        },
-                        {
-                            'name': 'extra',
-                            'title': 'The Item Extra Info',
-                            'isRequired': False,
-                        }
-                    ]
-                },
-                {
-                    'name': 'itemlist',
-                    'title': 'Item List',
-                    'desc': 'Description of Item List',
-                    'isList': True,
-                    'params': [
-                        {
-                            'name': 'id',
-                            'title': 'The Item ID',
-                            'isRequired': True,
-                        },
-                        {
-                            'name': 'title',
-                            'title': 'The Item Title',
-                            'defaultValue': 'The Default Title',
-                            'isRequired': True,
-                        },
-                        {
-                            'name': 'names',
-                            'title': 'The Item Names',
-                            'isRequired': False,
-                            'isList': True,
-                            'defaultValue': ['somename']
-                        },
-                        {
-                            'name': 'extra',
-                            'title': 'The Item Extra Info',
-                            'isRequired': False,
-                            'isList': True,
-                        }
-                    ]
-                },
-            ], True)
-            '''
-
-    
+        
     def remove_notices_all(self,command):
         LOGGER.info('remove_notices_all: notices={}'.format(self.Notices))
         # Remove all existing notices
         self.Notices.clear()
 
-    """
-    Optional.
-    Since the controller is a node in ISY, it will actual show up as a node.
-    Thus it needs to know the drivers and what id it will use. The controller
-    should report the node server status and have any commands that are
-    needed to control operation of the node server.
-
-    Typically, node servers will use the 'ST' driver to report the node server
-    status and it a best pactice to do this unless you have a very good
-    reason not to.
-
-    The id must match the nodeDef id="controller" in the nodedefs.xml
-    """
     id = 'controller'
     commands = {
         'QUERY': query,
