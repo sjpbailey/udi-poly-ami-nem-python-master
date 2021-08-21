@@ -8,9 +8,11 @@ MIT License
 import udi_interface
 import sys
 import time
+import xml.etree.ElementTree as ET
 
 LOGGER = udi_interface.LOGGER
 Custom = udi_interface.Custom
+ISY = udi_interface.ISY
 polyglot = None
 Parameters = None
 n_queue = []
@@ -21,12 +23,18 @@ TestNode is the device class.  Our simple counter device
 holds two values, the count and the count multiplied by a user defined
 multiplier. These get updated at every shortPoll interval
 '''
-class TestNode(udi_interface.Node):
+class AmiNemNode(udi_interface.Node):
     id = 'test'
     drivers = [
             {'driver': 'ST', 'value': 1, 'uom': 2},
             {'driver': 'GV0', 'value': 0, 'uom': 56},
             {'driver': 'GV1', 'value': 0, 'uom': 56},
+            {'driver': 'GPV', 'value': 0, 'uom': 2},
+            {'driver': 'CC', 'value': 0, 'uom': 30},
+            {'driver': 'GV1', 'value': 0, 'uom': 73},
+            {'driver': 'TPW', 'value': 0, 'uom': 33},
+            {'driver': 'GV2', 'value': 0, 'uom': 33},
+            {'driver': 'GV3', 'value': 0, 'uom': 33},
             ]
 
     def noop(self):
@@ -66,6 +74,7 @@ the user defined value in GV1. Then display a notice on the dashboard.
 def poll(polltype):
     global count
     global Parameters
+    self.isy = ISY()
 
     if 'shortPoll' in polltype:
         if Parameters['multiplier'] is not None:
@@ -74,14 +83,47 @@ def poll(polltype):
             mult = 1
 
         node = polyglot.getNode('my_address')
-        if node is not None:
-            count += 1
+        #if node is not None:
+        #    count += 1
 
-            node.setDriver('GV0', count, True, True)
-            node.setDriver('GV1', (count * mult), True, True)
+        #    node.setDriver('GV0', count, True, True)
+        #    node.setDriver('GV1', (count * mult), True, True)
 
             # be fancy and display a notice on the polyglot dashboard
-            polyglot.Notices['count'] = 'Current count is {}'.format(count)
+        #    polyglot.Notices['count'] = 'Current count is {}'.format(count)
+        
+        amiem_resp = node.isy.cmd("/rest/emeter")
+        amiem_count = 0
+        amiem_count1 = 0
+        ustdy_count = 0
+        prevs_count = 0
+        sumss_count = 0
+        
+        
+    if amiem_resp is not None:
+        amiem_root = ET.fromstring(amiem_resp)
+
+        #amiem_count = float(amiem_root('instantaneousDemand'))
+        for amie in amiem_root.iter('instantaneousDemand'):
+            amiem_count = float(amie.text) 
+            LOGGER.info("kW: " + str(amiem_count/float(mult)))
+            node.setDriver('CC', amiem_count/float(mult))
+
+            amiem_count1 = float(amiem_root.iter('instantaneousDemand'))
+            LOGGER.info("WATTS: " + str(amiem_count1))
+            node.setDriver('GV1', amiem_count1/float(mult)*1000)
+            
+            ustdy_count = float(amiem_root.iter('currDayDelivered'))
+            LOGGER.info("kWh: " + str(ustdy_count))
+            node.setDriver('TPW', ustdy_count/float(mult))
+            
+            prevs_count = float(amiem_root.iter('previousDayDelivered'))
+            LOGGER.info("kWh: " + str(prevs_count))
+            node.setDriver('GV2', prevs_count/float(mult))
+            
+            sumss_count = float(amiem_root.iter('currSumDelivered'))  #.text
+            LOGGER.info("kWh: " + str(sumss_count))
+            node.setDriver('GV3', sumss_count/float(mult))        
 
 
 '''
@@ -118,7 +160,7 @@ if __name__ == "__main__":
         based on what we find.  Here, we simply create our node and wait
         for the add to complete.
         '''
-        node = TestNode(polyglot, 'my_address', 'my_address', 'Counter')
+        node = AmiNemNode(polyglot, 'my_address', 'my_address', 'Counter')
         polyglot.addNode(node)
         wait_for_node_event()
 
