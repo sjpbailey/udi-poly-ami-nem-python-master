@@ -27,8 +27,8 @@ class AmiNemNode(udi_interface.Node):
     id = 'test'
     drivers = [
             {'driver': 'ST', 'value': 1, 'uom': 2},
-            {'driver': 'GV0', 'value': 0, 'uom': 56},
-            {'driver': 'GV1', 'value': 0, 'uom': 56},
+            #{'driver': 'GV0', 'value': 0, 'uom': 56},
+            #{'driver': 'GV1', 'value': 0, 'uom': 56},
             {'driver': 'GPV', 'value': 0, 'uom': 2},
             {'driver': 'CC', 'value': 0, 'uom': 30},
             {'driver': 'GV1', 'value': 0, 'uom': 73},
