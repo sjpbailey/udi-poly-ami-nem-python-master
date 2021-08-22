@@ -29,7 +29,7 @@ ISY = udi_interface.ISY # here it is declared atribute?
 LOG_HANDLER.set_log_format('%(asctime)s %(threadName)-10s %(name)-18s %(levelname)-8s %(module)s:%(funcName)s: %(message)s')
 
 class AmiNemController(udi_interface.Node):
-    def __init__(self, polyglot, primary, address, name, poly, isy):
+    def __init__(self, polyglot, primary, address, name):
         super(AmiNemController, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
         self.name = 'AMI NEM Controller'  # override what was passed in
@@ -51,37 +51,16 @@ class AmiNemController(udi_interface.Node):
         self.isy_ip = None
         self.nem_oncor = None
         self.isy = ISY(self.poly)
-        self.poly = poly
+        #self.poly = poly
 
     def parameterHandler(self, params):
         self.Parameters.load(params)
         LOGGER.debug('Loading parameters now')
         self.check_params()    
-    
+
     def start(self):
         #self.poly.updateProfile()
         self.discover()
-
-    #class isy(udi_interface.ISY):
-        #def __init__(self, poly,):
-            #self.isy = ISY(self.poly)
-            #isy = udi_interface.ISY()
-            #pass
-
-    #### no longer need auth is from ISY.cmd(COMMAND?)
-    """def get_request(self, url):
-        try:
-            r = requests.get(url, auth=HTTPBasicAuth(self.user, self.password))
-            if r.status_code == requests.codes.ok:
-                LOGGER.info(r.content)
-
-                return r.content
-            else:
-                LOGGER.error("ISY-Inventory.get_request:  " + r.content)
-                return None
-
-        except requests.exceptions.RequestException as e:
-            LOGGER.error("Error: " + str(e))"""    
 
     def discover(self, *args, **kwargs):
         if self.nem_oncor is not None:
@@ -104,26 +83,31 @@ class AmiNemController(udi_interface.Node):
             for amie in amiem_root.iter('instantaneousDemand'):
                 amiem_count = float(amie.text)
                 LOGGER.info("kW: " + str(amiem_count/float(self.nem_oncor)))
+                self.setDriver('CC', amiem_count/float(self.nem_oncor))
 
             #amiem_count1 = float(amiem_root.iter('instantaneousDemand'))
             for amie1 in amiem_root.iter('instantaneousDemand'):
                 amiem_count1 = float(amie1.text)
                 LOGGER.info("WATTS: " + str(amiem_count1))
+                self.setDriver('GV1', amiem_count1/float(self.nem_oncor)*1000)
 
             #ustdy_count = float(amiem_root.iter('currDayDelivered'))
             for ustd in amiem_root.iter('currDayDelivered'):
                 ustdy_count = float(ustd.text)
                 LOGGER.info("kWh: " + str(ustdy_count))
+                self.setDriver('TPW', ustdy_count/float(self.nem_oncor))
 
             #prevs_count = float(amiem_root.iter('previousDayDelivered'))
             for prev in amiem_root.iter('previousDayDelivered'):
                 prevs_count = float(prev.text)
                 LOGGER.info("kWh: " + str(prevs_count))
+                self.setDriver('GV2', prevs_count/float(self.nem_oncor))
 
             #sumss_count = float(amiem_root.iter('currSumDelivered')#.text)
             for sums in amiem_root.iter('currSumDelivered'):
                 sumss_count = float(sums.text)
                 LOGGER.info("kWh: " + str(sumss_count))
+                self.setDriver('GV3', sumss_count/float(self.nem_oncor))
 
     def delete(self):
         LOGGER.info('Deleting AMI NEM, Net Energy Meter')
@@ -138,7 +122,6 @@ class AmiNemController(udi_interface.Node):
         self.Notices.clear()
         
         default_nem_oncor = "1000"
-    #### All to be removed except Ip address    
 
         self.nem_oncor = self.Parameters.nem_oncor
         if self.nem_oncor is None:
@@ -189,3 +172,19 @@ class AmiNemController(udi_interface.Node):
         {'driver': 'GV2', 'value': 0, 'uom': 33},
         {'driver': 'GV3', 'value': 0, 'uom': 33},
     ]
+
+if __name__ == "__main__":
+    try:
+        polyglot = udi_interface.Interface([AmiNemController])
+        polyglot.start()
+        control = AmiNemController(polyglot, 'controller', 'controller', 'AmiNemContoller') # 'poly', 'isy', 
+        polyglot.runForever()
+    except (KeyboardInterrupt, SystemExit):
+        LOGGER.warning("Received interrupt or exit...")
+        """
+        Catch SIGTERM or Control-C and exit cleanly.
+        """
+        polyglot.stop()
+    except Exception as err:
+        LOGGER.error('Excption: {0}'.format(err), exc_info=True)
+    sys.exit(0)

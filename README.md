@@ -12,10 +12,10 @@ Adds your Smart Meter in the Administrative Console instead of just in the Event
 
 * Supported Nodes
 * Net Energy Meter
-  * Instantaneous Demand Watts
-  * Delivered kWh Today
-  * Delivered kWh Yesterday
-  * Delivered kWh Total
+* Instantaneous Demand Watts
+* Delivered kWh Today
+* Delivered kWh Yesterday
+* Delivered kWh Total
 
 ### Configuration
 
@@ -27,5 +27,5 @@ Adds your Smart Meter in the Administrative Console instead of just in the Event
 
 ##### User Provided
 
-* Enter your admin user name, password and IP address for the ISY controller
+* nem_oncor: Input your Meter type, 1000 for Landis+Gyr, 10000 for Oncor Meters
 * Save and restart the NodeServer
